@@ -21,12 +21,32 @@ def restore_windows_1252_characters(restore_string):
 
 #dictionary with all filings
 master_filings_dict = {}
-accession_number = '0001104659-04-027382'
+accession_number = ''
 master_filings_dict[accession_number] = {}
 master_filings_dict[accession_number]['sec_header_content'] = {}
 master_filings_dict[accession_number]['filing_documents'] = None
 # initalize the dictionary that will house all of our documents
 master_document_dict = {}
+
+search_dict = {}
+search_dict['keywords'] = []
+
+def get_document():
+    get = True
+    while get:
+        user_input = input("Please submit the link to the complete submission text file: ")
+        get = False
+    url = user_input.split("/")
+    accession_number = url[-1].split(".")[0]
+
+def search_terms():
+    ask = True
+    while ask:
+        keyword = input("Please enter a keyword you are searching for. Press N when done: ")
+        if keyword.lower() == "n":
+            ask = False
+        else: 
+            search_dict['keywords'].append(keyword)
 
 def get_header(soup):
     sec_header_tag = soup.find('sec-header')
@@ -135,11 +155,6 @@ def normalize():
         filing_documents[document_id]['pages_numbers_generated'] = gen_page_numbers 
         print('All the pages from document {} have been normalized.'.format(document_id))
 
-search_dict = {
-    'financial_words':['liability', 'asset'],
-
-    'admin_words':['administration', 'government']
-}
 
 def search():
     filing_documents = master_filings_dict[accession_number]['filing_documents']
@@ -170,21 +185,12 @@ def search():
     
         print('-'*80)    
         print('All the pages from document {} have been searched.'.format(document_id)) 
-                        
-'''
-                matching_words = [word for word in word_list if word in normalized_page_text]
-                matching_words_dict[page_num][search_list] = {}
-                matching_words_dict[page_num][search_list]['list_of_words'] = list_of_words
-                matching_words_dict[page_num][search_list]['matches'] = matching_words
-            print('Page {} of {} from document {} has been searched.'.format(page_num, page_length, document_id))
-    
-'''
-
-
 
 
 def main():
     new_html_text = r"https://www.sec.gov/Archives/edgar/data/1166036/000110465904027382/0001104659-04-027382.txt"
+    get_document()
+    search_terms()
     response = requests.get(new_html_text)
     soup = BeautifulSoup(response.content, 'lxml')
     get_header(soup)
