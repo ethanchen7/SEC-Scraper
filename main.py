@@ -31,14 +31,6 @@ master_document_dict = {}
 search_dict = {}
 search_dict['keywords'] = []
 
-def get_document():
-    get = True
-    while get:
-        user_input = input("Please submit the link to the complete submission text file: ")
-        get = False
-    url = user_input.split("/")
-    accession_number = url[-1].split(".")[0]
-
 def search_terms():
     ask = True
     while ask:
@@ -59,13 +51,19 @@ def doc_cleaner(soup):
         
         document_sequence = filing_document.sequence.find(text=True, recursive=False).strip()
         document_filename = filing_document.filename.find(text=True, recursive=False).strip()
-        document_description = filing_document.description.find(text=True, recursive=False).strip()
+        try:
+            document_description = filing_document.description.find(text=True, recursive=False).strip()
+        except:
+            pass
         
         master_document_dict[document_id] = {}
         
         master_document_dict[document_id]['document_sequence'] = document_sequence
         master_document_dict[document_id]['document_filename'] = document_filename
-        master_document_dict[document_id]['document_description'] = document_description
+        try:
+            master_document_dict[document_id]['document_description'] = document_description
+        except:
+            pass
         
         master_document_dict[document_id]['document_code'] = filing_document.extract()
 
@@ -188,15 +186,22 @@ def search():
 
 
 def main():
-    new_html_text = r"https://www.sec.gov/Archives/edgar/data/1166036/000110465904027382/0001104659-04-027382.txt"
-    get_document()
-    search_terms()
-    response = requests.get(new_html_text)
-    soup = BeautifulSoup(response.content, 'lxml')
-    get_header(soup)
-    doc_cleaner(soup)
-    normalize()
-    search()
+    get = True
+    while get:
+        new_html_text = input("Please submit the link to the complete submission text file: ")
+        get = False
+    url = new_html_text.split("/")
+    accession_number = url[-1].split(".")[0]
+    try:
+        search_terms()
+        response = requests.get(new_html_text)
+        soup = BeautifulSoup(response.content, 'lxml')
+        get_header(soup)
+        doc_cleaner(soup)
+        normalize()
+        search()
+    except RecursionError:
+        print("File is too big to parse.")
 
 if __name__ == "__main__":
     main()
